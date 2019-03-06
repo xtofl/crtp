@@ -15,7 +15,7 @@ public:
 };
 
 class Middle: public Base {
-public:
+protected: // NOTE: this is an implementation detail!
     virtual bool valid_impl() const override {
         auto b = Base::valid_impl();
         puts("Middle");
