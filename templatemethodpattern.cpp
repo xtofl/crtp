@@ -6,32 +6,39 @@ public:
     virtual ~Base(){}
 
     bool valid() const {
-        return valid_impl();
-    }
-    virtual bool valid_impl() const {
         puts("Base");
         return true;
     };
 };
 
+template<typename V> bool valid(const V& v) {
+    return v.valid();
+}
+
 class Middle: public Base {
-protected: // NOTE: this is an implementation detail!
-    virtual bool valid_impl() const override {
-        auto b = Base::valid_impl();
+public:
+    bool valid() const {
         puts("Middle");
-        return false && b;
+        return true;
     }
 };
+
+template<> bool valid(const Middle& v) {
+    return v.valid() && valid(static_cast<const Base&>(v));
+}
 
 class Bottom: public Middle {
-    bool valid_impl() const override {
-        auto b = Middle::valid_impl();
+public:
+    bool valid() const {
         puts("Bottom");
-        return false && b;
+        return true;
     }
 };
+template<> bool valid(const Bottom& v) {
+    return v.valid() && valid(static_cast<const Middle&>(v));
+}
 
 int main() {
-    std::unique_ptr<Base> x = std::make_unique<Bottom>();
-    printf("Valid: %d\n", x->valid());
+    auto x = std::make_unique<Bottom>();
+    printf("Valid: %d\n", valid(*x));
 }
