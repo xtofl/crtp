@@ -5,7 +5,10 @@ class Base {
 public:
     virtual ~Base(){}
 
-    virtual bool valid() const {
+    bool valid() const {
+        return valid_impl();
+    }
+    virtual bool valid_impl() const {
         puts("Base");
         return true;
     };
@@ -13,16 +16,16 @@ public:
 
 class Middle: public Base {
 public:
-    virtual bool valid() const override {
-        auto b = Base::valid();
+    virtual bool valid_impl() const override {
+        auto b = Base::valid_impl();
         puts("Middle");
         return false && b;
     }
 };
 
 class Bottom: public Middle {
-    bool valid() const override {
-        auto b = Middle::valid();
+    bool valid_impl() const override {
+        auto b = Middle::valid_impl();
         puts("Bottom");
         return false && b;
     }
