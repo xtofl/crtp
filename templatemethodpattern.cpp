@@ -1,6 +1,10 @@
 #include <cstdio>
 #include <memory>
 
+template<typename V> bool valid(const V& v) {
+    return v.valid() && valid<typename V::Parent>(v);
+}
+
 class Base {
 public:
     virtual ~Base(){}
@@ -11,32 +15,25 @@ public:
     };
 };
 
-template<typename V> bool valid(const V& v) {
-    return v.valid();
-}
+template<> bool valid(const Base &b) { return b.valid(); }
 
 class Middle: public Base {
 public:
+    using Parent = Base;
     bool valid() const {
         puts("Middle");
         return true;
     }
 };
 
-template<> bool valid(const Middle& v) {
-    return v.valid() && valid(static_cast<const Base&>(v));
-}
-
 class Bottom: public Middle {
 public:
+    using Parent = Middle;
     bool valid() const {
         puts("Bottom");
         return true;
     }
 };
-template<> bool valid(const Bottom& v) {
-    return v.valid() && valid(static_cast<const Middle&>(v));
-}
 
 int main() {
     auto x = std::make_unique<Bottom>();
