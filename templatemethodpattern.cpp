@@ -1,41 +1,50 @@
 #include <cstdio>
 #include <memory>
 
-template<typename V> bool valid(const V& v) {
-    return v.valid() && valid<typename V::Parent>(v);
-}
 
-class Base {
+class IValid {
+public:
+    virtual ~IValid(){}
+    virtual bool valid() const { return true; }; // monoid {bool, &&, true}
+};
+
+template<typename V, typename Parent_> class ValidateParentToo :
+    public Parent_
+{
+public:
+    using Parent = Parent_;
+    bool valid() const override {
+        return (this->valid_impl)() && Parent::valid();
+    }
+};
+
+class Base : public IValid {
 public:
     virtual ~Base(){}
 
-    bool valid() const {
+    bool valid_impl() const {
         puts("Base");
         return true;
     };
 };
 
-template<> bool valid(const Base &b) { return b.valid(); }
-
-class Middle: public Base {
+class Middle: public ValidateParentToo<Middle, Base> {
 public:
-    using Parent = Base;
-    bool valid() const {
+    bool valid_impl() const {
         puts("Middle");
         return true;
     }
 };
 
-class Bottom: public Middle {
+class Bottom: public ValidateParentToo<Bottom, Middle> {
 public:
-    using Parent = Middle;
-    bool valid() const {
+    bool valid_impl() const {
         puts("Bottom");
         return true;
     }
 };
 
 int main() {
-    auto x = std::make_unique<Bottom>();
-    printf("Valid: %d\n", valid(*x));
+    std::unique_ptr<IValid> x = std::make_unique<Bottom>();
+    printf("Valid: %d\n", x->valid());
 }
